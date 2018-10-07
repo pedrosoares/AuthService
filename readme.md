@@ -4,6 +4,11 @@
 [
   {
     "domain": "http://localhost:8080",
+    "uri": "/auth/register",
+    "method": "post",
+    "permission": []
+  },{
+    "domain": "http://localhost:8080",
     "uri": "/auth/login",
     "method": "post",
     "permission": []
