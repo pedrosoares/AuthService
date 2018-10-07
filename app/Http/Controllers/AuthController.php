@@ -1,8 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Permission;
+use App\User;
+use App\UserPermission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Laravel\Lumen\Routing\Controller;
 
 class AuthController extends Controller {
@@ -15,7 +19,7 @@ class AuthController extends Controller {
      * @return void
      */
     public function __construct() {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
         $this->auth = app("auth");
     }
 
@@ -77,6 +81,49 @@ class AuthController extends Controller {
             'token_type' => 'bearer',
             'expires_in' => $this->auth->factory()->getTTL() * 60
         ]);
+    }
+
+    /**
+     * Create a new User
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function register(Request $request) {
+        $this->validate($request, [
+            'name' => 'required',
+            'password' => 'required',
+            'email' => 'required|email|unique:users'
+        ]);
+        try {
+            $user = null;
+            //Transaction is used if the Permission insert fail we remove the user
+            app('db')->transaction(function() use (&$user, $request) {
+                // Create user
+                $user = User::create([
+                    'name' => $request->get("name"),
+                    'email' => $request->get("email"),
+                    'password' => app("hash")
+                        ->make($request->get("password")),
+                ]);
+                // Add user Permission to validate Login
+                UserPermission::create([
+                    "user_id" => $user->id,
+                    "permission_id" => Permission::AUTH
+                ]);
+            });
+            return new JsonResponse([
+                "message" => "User registered successfully",
+                "user" => $user
+            ], 200);
+        }catch (\Exception $exception) {
+            Log::error($exception);
+            return new JsonResponse([
+                "message" => "Something went wrong!",
+                "user" => null
+            ], 500);
+        }
     }
 
 }

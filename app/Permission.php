@@ -10,4 +10,6 @@ class Permission extends Model {
     protected $table = "permissions";
     protected $guarded = [];
 
+    const AUTH = 1;
+
 }

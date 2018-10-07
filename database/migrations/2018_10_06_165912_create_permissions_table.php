@@ -18,6 +18,12 @@ class CreatePermissionsTable extends Migration
             $table->string("name");
             $table->timestamps();
         });
+
+        //Permission required to all users to be logged in
+        \App\Permission::create([
+            //"id" => 1,
+            "name" => "auth"
+        ]);
     }
 
     /**
