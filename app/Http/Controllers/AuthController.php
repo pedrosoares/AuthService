@@ -19,7 +19,7 @@ class AuthController extends Controller {
      * @return void
      */
     public function __construct() {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'users']]);
         $this->auth = app("auth");
     }
 
@@ -124,6 +124,20 @@ class AuthController extends Controller {
                 "user" => null
             ], 500);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function users(Request $request){
+        $this->validate($request, [
+            'users' => 'required|array'
+        ]);
+        return new JsonResponse(
+            User::whereIn('id', $request->get("users"))->get(), 200
+        );
     }
 
 }

@@ -4,6 +4,14 @@
 [
   {
     "domain": "http://localhost:8080",
+    "uri": "/auth/users",
+    "whitelist": [
+      "127.0.0.1"
+    ],
+    "method": "post",
+    "permission": []
+  },{
+    "domain": "http://localhost:8080",
     "uri": "/auth/register",
     "method": "post",
     "permission": []
